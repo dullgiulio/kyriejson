@@ -31,15 +31,31 @@ func (h *httpChecker) run(resp *http.Response) {
 	}
 }
 
-type jsonCheck func(map[string]interface{}) error
+type jsonCheck func(jsonData) (jsonData, error)
+
+type jsonCheckList []jsonCheck
+
+func (js jsonCheckList) run(data jsonData) error {
+	for _, check := range js {
+		d, err := check(data)
+		if err != nil {
+			return err
+		}
+		if d == nil {
+			return nil
+		}
+		data = d
+	}
+	return nil
+}
 
 type jsonChecker struct {
 	errors  errlist
 	counter *counter
-	checks  []jsonCheck
+	checks  []jsonCheckList
 }
 
-func newJsonChecker(errors errlist, counter *counter, checks []jsonCheck) *jsonChecker {
+func newJsonChecker(errors errlist, counter *counter, checks []jsonCheckList) *jsonChecker {
 	return &jsonChecker{
 		errors:  errors,
 		counter: counter,
@@ -47,9 +63,9 @@ func newJsonChecker(errors errlist, counter *counter, checks []jsonCheck) *jsonC
 	}
 }
 
-func (j *jsonChecker) run(data map[string]interface{}) {
-	for _, check := range j.checks {
-		if err := check(data); err != nil {
+func (j *jsonChecker) run(data jsonData) {
+	for _, list := range j.checks {
+		if err := list.run(data); err != nil {
 			j.errors.add(err)
 			j.counter.failedJson()
 			continue

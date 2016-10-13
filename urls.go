@@ -6,27 +6,34 @@ import (
 	"net/http"
 )
 
+type jsonData interface{}
+
 type errlist interface {
 	add(error)
 }
 
 type checkedUrl struct {
-	errs     []error
-	url      string
-	response interface{}
-	hcheck   *httpChecker
+	errs   []error
+	url    string
+	data   jsonData
+	hcheck *httpChecker
+	jcheck *jsonChecker
 }
 
 func newCheckedUrl(url string) *checkedUrl {
 	return &checkedUrl{
-		url:      url,
-		errs:     make([]error, 0),
-		response: make(map[string]interface{}),
+		url:  url,
+		errs: make([]error, 0),
+		data: jsonData(make(map[string]interface{})),
 	}
 }
 
 func (c *checkedUrl) checkHttp(hcheck *httpChecker) {
 	c.hcheck = hcheck
+}
+
+func (c *checkedUrl) checkJson(jcheck *jsonChecker) {
+	c.jcheck = jcheck
 }
 
 func (c *checkedUrl) add(e error) {
@@ -40,9 +47,16 @@ func (c *checkedUrl) load() error {
 	}
 	defer r.Body.Close()
 
-	c.hcheck.run(r)
-
-	return json.NewDecoder(r.Body).Decode(&c.response)
+	if c.hcheck != nil {
+		c.hcheck.run(r)
+	}
+	if err := json.NewDecoder(r.Body).Decode(&c.data); err != nil {
+		return err
+	}
+	if c.jcheck != nil {
+		c.jcheck.run(c.data)
+	}
+	return nil
 }
 
 func (c *checkedUrl) showErrors() {

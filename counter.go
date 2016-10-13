@@ -65,7 +65,7 @@ func (c *counter) print() {
 	fmt.Printf(
 		"===========================================================\n"+
 			"%s - %d tests run, %d urls; %d test failed\n"+
-			"(%d/%d HTTP test failed, %d/%d JSON tests failed)\n",
+			"%d/%d HTTP test failed, %d/%d JSON tests failed\n",
 		res, c.total(), c.urls, c.httpFail+c.jsonFail,
 		c.httpFail, c.httpPass+c.httpFail,
 		c.jsonFail, c.jsonPass+c.jsonFail)
