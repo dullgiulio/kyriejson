@@ -1,11 +1,11 @@
-package main
+package json
 
 import (
 	"fmt"
 )
 
 // TODO: This should take a jsonCheckList as argument (what to do with the returned data)
-func jsonGetKey(key string) jsonCheck {
+func GetKey(key string) jsonCheck {
 	return func(data jsonData) (jsonData, error) {
 		m, ok := data.(map[string]interface{})
 		if !ok {
@@ -19,7 +19,7 @@ func jsonGetKey(key string) jsonCheck {
 	}
 }
 
-func jsonInArray(data jsonData) (jsonData, error) {
+func InArray(data jsonData) (jsonData, error) {
 	arr, ok := data.([]interface{})
 	if !ok {
 		return nil, fmt.Errorf("Expected an array but it wasn't")
@@ -27,7 +27,7 @@ func jsonInArray(data jsonData) (jsonData, error) {
 	return arr, nil
 }
 
-func jsonEach(checks jsonCheckList) jsonCheck {
+func Each(checks jsonCheckList) jsonCheck {
 	return func(data jsonData) (jsonData, error) {
 		arr, ok := data.([]interface{})
 		if !ok {

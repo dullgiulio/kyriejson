@@ -1,4 +1,4 @@
-package main
+package kyriejson
 
 import (
 	"net/http"
