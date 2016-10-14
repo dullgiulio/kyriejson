@@ -43,17 +43,22 @@ func (t *Test) AddHTTP(tests []string) error {
 
 func main() {
 	checks := []struct {
-		hchecks []httpCheck
+		hchecks []string
 		jchecks []jsonCheckList
 	}{
 		{
-			[]httpCheck{
-				httpCheckTypeJSON,
-				httpCheckHasCORS,
+			[]string{
+				"http:type-json",
+				"http:has-cors",
 			},
 			[]jsonCheckList{
+				// Command("json:get-key", "aboutUs") 
 				jsonCheckList{jsonGetKey("aboutUs")},
+				// Command("json:get-key", "topLinks"),
+				// Command("json:in-array"),
+				// Block("json:each", Command("json:get-key", "title")))
 				jsonCheckList{jsonGetKey("topLinks"), jsonInArray, jsonEach(jsonCheckList{jsonGetKey("title")})},
+				// Command("json:get-key", "bottomLinks")
 				jsonCheckList{jsonGetKey("bottomLinks")},
 			},
 		},
